@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+    tools{
+        maven 'maven_3_5_0'
+    }
+    stages{
+        stage('Maven build'){
+            steps{
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SMATYS300/Coursework_2.git']]])
+                sh 'mvn clean install'
+            }
+        }
+        stage('Build docker image'){
+            steps{
+                script{
+                    sh 'docker build -t smatys300/coursework2 .'
+                }
+            }
+        }
+        stage('Push image to Dockerhub'){
+            steps{
+                script{
+                   withCredentials([string(credentialsId: 'secrets.DOCKER_USERNAME', variable: 'secrets.DOCKER_PASSWORD')]) {
+                   sh 'docker login -u secrets.DOCKER_USERNAME -p ${secrets.DOCKER_PASSWORD}'
+
+}
+                   sh 'docker push smatys300/coursework2'
+                }
+            }
+        }
+        stage('Deploy to kubectl'){
+            steps{
+                script{
+                    kubernetesDeploy (configs: 'kubectl_deploy.yml')
+                }
+            }
+        }
+    }
+}
