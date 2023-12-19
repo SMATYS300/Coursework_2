@@ -31,7 +31,7 @@ pipeline {
         stage('Deploy to kubectl'){
             steps{
                 script{
-                    kubernetesDeploy (configs: 'kubectl_deploy.yml')
+                    kubernetesDeploy (configs: 'deploy_image.yml')
                 }
             }
         }
