@@ -29,6 +29,6 @@
       command: kubectl expose deployment cw2 --type=NodePort --port=8080
       when: kubectl_installed is succeeded
 
-    - name: Scale deployment to 3 replicas
-      command: kubectl scale deployment cw2 --replicas=3
+    - name: Scale deployment to 4 replicas
+      command: kubectl scale deployment cw2 --replicas=4
       when: kubectl_installed is succeeded
