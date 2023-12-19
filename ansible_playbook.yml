@@ -1,0 +1,34 @@
+---
+- name: Install Kubectl, Install and start Minikube, Deploy Docker image to Kubernetes, Create a service for the application and Scale Deployment
+  hosts: localhost
+  user: ubuntu
+  become: yes
+
+  tasks:
+    - name: Install Kubectl
+      command: sudo apt-get update && sudo apt-get install -y apt-transport-https && curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add - && echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list && sudo apt-get update && sudo apt-get install -y kubectl
+      args:
+        creates: /usr/local/bin/kubectl
+      register: kubectl_installed
+
+    - name: Install Minikube
+      command: curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+      args:
+        creates: /usr/local/bin/minikube
+      register: minikube_installed
+
+    - name: Start Minikube
+      command: minikube start
+      when: minikube_installed is succeeded
+
+    - name: Deploy Docker image to Kubernetes
+      command: kubectl create deployment cw2 --image=smatys300/coursework2:1.0
+      when: kubectl_installed is succeeded
+
+    - name: Expose deployment as a service
+      command: kubectl expose deployment cw2 --type=NodePort --port=8080
+      when: kubectl_installed is succeeded
+
+    - name: Scale deployment to 3 replicas
+      command: kubectl scale deployment cw2 --replicas=3
+      when: kubectl_installed is succeeded
